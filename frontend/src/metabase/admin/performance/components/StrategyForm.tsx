@@ -31,6 +31,8 @@ import { DurationUnit } from "metabase-types/api";
 import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
 import { rootId, Strategies, strategyValidationSchema } from "../strategies";
 
+import { InvalidateNowButton } from "./InvalidateNowButton";
+
 export const StrategyForm = ({
   targetId,
   setIsDirty,
@@ -45,6 +47,13 @@ export const StrategyForm = ({
   const defaultStrategy: Strategy = {
     type: targetId === rootId ? "nocache" : "inherit",
   };
+
+  const shouldAllowInvalidation =
+    targetId !== null &&
+    targetId !== rootId &&
+    // TODO: Confirm that this is right
+    savedStrategy?.type !== "nocache";
+
   return (
     <FormProvider<Strategy>
       key={targetId}
@@ -53,7 +62,11 @@ export const StrategyForm = ({
       onSubmit={saveStrategy}
       enableReinitialize
     >
-      <StrategyFormBody targetId={targetId} setIsDirty={setIsDirty} />
+      <StrategyFormBody
+        targetId={targetId}
+        setIsDirty={setIsDirty}
+        shouldAllowInvalidation={shouldAllowInvalidation}
+      />
     </FormProvider>
   );
 };
@@ -61,9 +74,11 @@ export const StrategyForm = ({
 const StrategyFormBody = ({
   targetId,
   setIsDirty,
+  shouldAllowInvalidation,
 }: {
   targetId: number | null;
   setIsDirty: (isDirty: boolean) => void;
+  shouldAllowInvalidation: boolean;
 }) => {
   const { dirty, values, setFieldValue } = useFormikContext<Strategy>();
   const { setStatus } = useFormContext();
@@ -90,43 +105,51 @@ const StrategyFormBody = ({
   }, [selectedStrategyType, values, setFieldValue]);
 
   return (
-    <Form
-      h="100%"
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
-      <Stack p="lg" spacing="xl" maw="27.5rem">
-        <StrategySelector targetId={targetId} />
-        {selectedStrategyType === "ttl" && (
-          <>
-            <Field
-              title={t`Minimum query duration`}
-              subtitle={t`Metabase will cache all saved questions with an average query execution time greater than this many milliseconds.`}
-            >
-              <PositiveNumberInput strategyType="ttl" name="min_duration_ms" />
-            </Field>
-            <Field
-              title={t`Cache time-to-live (TTL) multiplier`}
-              subtitle={<MultiplierFieldSubtitle />}
-            >
-              <PositiveNumberInput strategyType="ttl" name="multiplier" />
-            </Field>
-          </>
-        )}
-        {selectedStrategyType === "duration" && (
-          <>
-            <Field title={t`Cache results for this many hours`}>
-              <PositiveNumberInput strategyType="duration" name="duration" />
-            </Field>
-            <input type="hidden" name="unit" />
-          </>
-        )}
-      </Stack>
-      <FormButtons />
-    </Form>
+    <div style={{ height: "100%", position: "relative" }}>
+      {shouldAllowInvalidation && targetId && (
+        <InvalidateNowButton targetId={targetId} />
+      )}
+      <Form
+        h="100%"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        <Stack p="lg" spacing="xl" maw="27.5rem">
+          <StrategySelector targetId={targetId} />
+          {selectedStrategyType === "ttl" && (
+            <>
+              <Field
+                title={t`Minimum query duration`}
+                subtitle={t`Metabase will cache all saved questions with an average query execution time greater than this many milliseconds.`}
+              >
+                <PositiveNumberInput
+                  strategyType="ttl"
+                  name="min_duration_ms"
+                />
+              </Field>
+              <Field
+                title={t`Cache time-to-live (TTL) multiplier`}
+                subtitle={<MultiplierFieldSubtitle />}
+              >
+                <PositiveNumberInput strategyType="ttl" name="multiplier" />
+              </Field>
+            </>
+          )}
+          {selectedStrategyType === "duration" && (
+            <>
+              <Field title={t`Cache results for this many hours`}>
+                <PositiveNumberInput strategyType="duration" name="duration" />
+              </Field>
+              <input type="hidden" name="unit" />
+            </>
+          )}
+        </Stack>
+        <FormButtons />
+      </Form>
+    </div>
   );
 };
 
