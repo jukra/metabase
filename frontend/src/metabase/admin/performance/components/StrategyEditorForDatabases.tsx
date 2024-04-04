@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { InjectedRouter, Route } from "react-router";
 import { withRouter } from "react-router";
 import { t } from "ttag";
@@ -152,6 +152,17 @@ const StrategyEditorForDatabases_Base = ({
 
   const showSpinner = useDelayedLoadingSpinner();
 
+  const shouldAllowInvalidation = useMemo(() => {
+    if (targetId === null) return false;
+    if (targetId === rootId) return false;
+    if (savedStrategy?.type === "nocache") return false;
+    const inheritingRootStrategy = ["inherit", undefined].includes(
+      savedStrategy?.type,
+    );
+    // TODO: Later, disable the button only when the DB inherits a root strategy of 'nocache'
+    return !inheritingRootStrategy;
+  }, [configs, savedStrategy?.type, targetId]);
+
   if (error || loading) {
     return showSpinner ? (
       <LoadingAndErrorWrapper error={error} loading={loading} />
@@ -200,6 +211,7 @@ const StrategyEditorForDatabases_Base = ({
               setIsDirty={setIsStrategyFormDirty}
               saveStrategy={saveStrategy}
               savedStrategy={savedStrategy}
+              shouldAllowInvalidation={shouldAllowInvalidation}
             />
           )}
         </Panel>

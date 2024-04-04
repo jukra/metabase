@@ -32,27 +32,24 @@ import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
 import { rootId, Strategies, strategyValidationSchema } from "../strategies";
 
 import { InvalidateNowButton } from "./InvalidateNowButton";
+import {PLUGIN_CACHING} from "metabase/plugins";
 
 export const StrategyForm = ({
   targetId,
   setIsDirty,
   saveStrategy,
   savedStrategy,
+shouldAllowInvalidation
 }: {
   targetId: number | null;
   setIsDirty: (isDirty: boolean) => void;
   saveStrategy: (values: Strategy) => Promise<void>;
   savedStrategy?: Strategy;
+  shouldAllowInvalidation: boolean;
 }) => {
   const defaultStrategy: Strategy = {
     type: targetId === rootId ? "nocache" : "inherit",
   };
-
-  const shouldAllowInvalidation =
-    targetId !== null &&
-    targetId !== rootId &&
-    // TODO: Confirm that this is right
-    savedStrategy?.type !== "nocache";
 
   return (
     <FormProvider<Strategy>
@@ -107,7 +104,7 @@ const StrategyFormBody = ({
   return (
     <div style={{ height: "100%", position: "relative" }}>
       {shouldAllowInvalidation && targetId && (
-        <InvalidateNowButton targetId={targetId} />
+        <PLUGIN_CACHING.InvalidateNowButton targetId={targetId} />
       )}
       <Form
         h="100%"
