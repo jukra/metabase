@@ -153,14 +153,22 @@ const StrategyEditorForDatabases_Base = ({
   const showSpinner = useDelayedLoadingSpinner();
 
   const shouldAllowInvalidation = useMemo(() => {
-    if (targetId === null) return false;
-    if (targetId === rootId) return false;
-    if (savedStrategy?.type === "nocache") return false;
+    if (targetId === null) {
+      return false;
+    }
+    if (targetId === rootId) {
+      return false;
+    }
+    if (savedStrategy?.type === "nocache") {
+      return false;
+    }
     const inheritingRootStrategy = ["inherit", undefined].includes(
       savedStrategy?.type,
     );
-    // TODO: Later, disable the button only when the DB inherits a root strategy of 'nocache'
-    return !inheritingRootStrategy;
+    const rootConfig = findWhere(configs, { model_id: rootId });
+    const inheritingDoNotCache =
+      inheritingRootStrategy && !rootConfig?.strategy;
+    return !inheritingDoNotCache;
   }, [configs, savedStrategy?.type, targetId]);
 
   if (error || loading) {

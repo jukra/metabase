@@ -8,7 +8,7 @@ import { FixedSizeIcon, Flex, Group, Icon, Loader, Text } from "metabase/ui";
 export const InvalidateNowButton = ({ targetId }: { targetId: number }) => {
   const invalidateTargetDatabase = async () => {
     await CacheConfigApi.invalidate(
-      { overrides: true, database: targetId },
+      { include: "overrides", database: targetId },
       { hasBody: false },
     );
   };
