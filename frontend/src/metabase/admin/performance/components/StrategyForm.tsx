@@ -189,9 +189,10 @@ export const FormButtons = () => {
         bottom: 0,
         borderTop: `1px solid ${color("border")}`,
       }}
-      p="1rem"
-      bg={color("white")}
+      p="md"
+      px="lg"
       spacing="md"
+      bg="white"
     >
       <Button
         disabled={!dirty || isFormPending}

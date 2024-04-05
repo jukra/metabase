@@ -1,11 +1,14 @@
-import { InvalidateNowLoader } from "metabase/admin/performance/components/StrategyForm.styled";
+import {
+  IconInButton,
+  LoaderInDarkButton,
+} from "metabase/admin/performance/components/StrategyForm.styled";
 import { isErrorWithMessage } from "metabase/admin/performance/strategies";
 import { Form, FormProvider } from "metabase/forms";
 import { color } from "metabase/lib/colors";
 import { useDispatch } from "metabase/lib/redux";
 import { addUndo } from "metabase/redux/undo";
 import { CacheConfigApi } from "metabase/services";
-import { FixedSizeIcon, Text, Tooltip } from "metabase/ui";
+import { Text, Tooltip } from "metabase/ui";
 
 import { StyledInvalidateNowButton } from "./InvalidateNowButton.styled";
 
@@ -43,19 +46,9 @@ export const InvalidateNowButton = ({ targetId }: { targetId: number }) => {
         <Tooltip label="Invalidate cache right now" position="bottom">
           <StyledInvalidateNowButton
             variant="subtle"
-            label={
-              <FixedSizeIcon
-                color={color("white")}
-                name="trash"
-                style={{ position: "relative", top: "1px" }}
-              />
-            }
-            activeLabel={<InvalidateNowLoader size="1rem" />}
-            successLabel={
-              <Text fw="bold" lh="1" color="success">
-                <FixedSizeIcon name="check" color="white" />
-              </Text>
-            }
+            label={<IconInButton color={color("white")} name="trash" />}
+            activeLabel={<LoaderInDarkButton size="1rem" />}
+            successLabel={<IconInButton name="check" color="white" />}
             failedLabel={
               <Text fw="bold" lh="1" color="white">
                 Error
