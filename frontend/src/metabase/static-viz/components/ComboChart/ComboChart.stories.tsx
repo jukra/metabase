@@ -549,6 +549,13 @@ BarTwoDaysOfWeek.args = {
   renderingContext,
 };
 
+export const ImageCutOff37275 = Template.bind({});
+ImageCutOff37275.args = {
+  rawSeries: data.imageCutOff37275 as any,
+  dashcardSettings: {},
+  renderingContext,
+};
+
 export const Default = Template.bind({});
 Default.args = {
   rawSeries: data.messedUpAxis as any,
