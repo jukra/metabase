@@ -14,34 +14,38 @@ import {
   useFormContext,
 } from "metabase/forms";
 import { color } from "metabase/lib/colors";
+import { PLUGIN_CACHING } from "metabase/plugins";
 import {
+  Box,
   Button,
+  FixedSizeIcon,
   Group,
   Icon,
-  Loader,
   Radio,
   Stack,
   Text,
   Title,
   Tooltip,
 } from "metabase/ui";
+import type Database from "metabase-lib/v1/metadata/Database";
 import type { Strategy, StrategyType } from "metabase-types/api";
 import { DurationUnit } from "metabase-types/api";
 
 import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
 import { rootId, Strategies, strategyValidationSchema } from "../strategies";
 
-import { InvalidateNowButton } from "./InvalidateNowButton";
-import {PLUGIN_CACHING} from "metabase/plugins";
+import { LoaderInButton } from "./StrategyForm.styled";
 
 export const StrategyForm = ({
   targetId,
+  targetDatabase,
   setIsDirty,
   saveStrategy,
   savedStrategy,
-shouldAllowInvalidation
+  shouldAllowInvalidation,
 }: {
   targetId: number | null;
+  targetDatabase: Database | undefined;
   setIsDirty: (isDirty: boolean) => void;
   saveStrategy: (values: Strategy) => Promise<void>;
   savedStrategy?: Strategy;
@@ -61,6 +65,7 @@ shouldAllowInvalidation
     >
       <StrategyFormBody
         targetId={targetId}
+        targetDatabase={targetDatabase}
         setIsDirty={setIsDirty}
         shouldAllowInvalidation={shouldAllowInvalidation}
       />
@@ -70,10 +75,12 @@ shouldAllowInvalidation
 
 const StrategyFormBody = ({
   targetId,
+  targetDatabase,
   setIsDirty,
   shouldAllowInvalidation,
 }: {
   targetId: number | null;
+  targetDatabase: Database | undefined;
   setIsDirty: (isDirty: boolean) => void;
   shouldAllowInvalidation: boolean;
 }) => {
@@ -103,8 +110,20 @@ const StrategyFormBody = ({
 
   return (
     <div style={{ height: "100%", position: "relative" }}>
-      {shouldAllowInvalidation && targetId && (
-        <PLUGIN_CACHING.InvalidateNowButton targetId={targetId} />
+      {targetDatabase && (
+        <Box lh="1rem" px="lg" pt="lg" color="text-medium">
+          <Group spacing="lg">
+            <Group spacing="sm">
+              <FixedSizeIcon name="database" color="inherit" />
+              <Text fw="bold" py="1rem">
+                {targetDatabase.displayName()}
+              </Text>
+            </Group>
+            {shouldAllowInvalidation && targetId && (
+              <PLUGIN_CACHING.InvalidateNowButton targetId={targetId} />
+            )}
+          </Group>
+        </Box>
       )}
       <Form
         h="100%"
@@ -186,7 +205,7 @@ export const FormButtons = () => {
             <Icon name="check" /> {t`Saved`}
           </Group>
         }
-        activeLabel={<Loader size="xs" />}
+        activeLabel={<LoaderInButton size=".8rem" />}
         variant="filled"
         data-testid="strategy-form-submit-button"
       />
@@ -204,7 +223,10 @@ const StrategySelector = ({ targetId }: { targetId: number | null }) => {
     <section>
       <FormRadioGroup
         label={
-          <Text lh="1rem">{t`When should cached query results be invalidated?`}</Text>
+          <Text
+            lh="1rem"
+            color="text-medium"
+          >{t`When should cached query results be invalidated?`}</Text>
         }
         name="type"
       >

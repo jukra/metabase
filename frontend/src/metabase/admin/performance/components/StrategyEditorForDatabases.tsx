@@ -101,6 +101,8 @@ const StrategyEditorForDatabases_Base = ({
     }
   }, [canOverrideRootStrategy, targetId]);
 
+  const targetDatabase = databases.find(db => db.id === targetId);
+
   const saveStrategy = useCallback(
     async (values: Strategy) => {
       if (targetId === null) {
@@ -216,6 +218,7 @@ const StrategyEditorForDatabases_Base = ({
           {targetId !== null && (
             <StrategyForm
               targetId={targetId}
+              targetDatabase={targetDatabase}
               setIsDirty={setIsStrategyFormDirty}
               saveStrategy={saveStrategy}
               savedStrategy={savedStrategy}
