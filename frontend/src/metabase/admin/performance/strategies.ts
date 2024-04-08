@@ -2,6 +2,7 @@ import { c, t } from "ttag";
 import type { AnySchema } from "yup";
 import * as Yup from "yup";
 import type { SchemaObjectDescription } from "yup/lib/schema";
+import cronParser from "cron-parser";
 
 import type { Config, Strategy, StrategyType } from "metabase-types/api";
 import { DurationUnit } from "metabase-types/api";
@@ -53,6 +54,11 @@ export const durationStrategyValidationSchema = Yup.object({
   ),
 });
 
+export const scheduleStrategyValidationSchema = Yup.object({
+  type: Yup.string().equals(["schedule"]),
+  cron: Yup.string().required(t`A cron expression is required`),
+});
+
 export const strategyValidationSchema = Yup.object().test(
   "strategy-validation",
   "The object must match one of the strategy validation schemas",
@@ -94,6 +100,11 @@ export const Strategies: Record<StrategyType, StrategyData> = {
     shortLabel: c("'TTL' is short for 'time-to-live'").t`TTL`,
     validateWith: ttlStrategyValidationSchema,
   },
+  schedule: {
+    label: t`Schedule: at regular intervals`,
+    shortLabel: t`Schedule`,
+    validateWith: scheduleStrategyValidationSchema,
+  },
   duration: {
     label: t`Duration: after a specific number of hours`,
     validateWith: durationStrategyValidationSchema,
@@ -131,6 +142,10 @@ export const getFieldsForStrategyType = (strategyType: StrategyType) => {
   return fields;
 };
 
+const parseCronExpressionIntoFields = (cronExpression: string) => {
+  return cronParser.parseExpression(cronExpression).fields;
+};
+
 export const translateConfig = (
   config: Config,
   direction: "fromAPI" | "toAPI",
@@ -155,7 +170,16 @@ export const translateConfig = (
             }),
       },
     };
+  } else if (config.strategy.type === "schedule") {
+    return {
+      ...config,
+      strategy: {
+        ...config.strategy,
+        ...parseCronExpressionIntoFields(config.strategy.cronExpression),
+      },
+    };
   }
+
   return config;
 };
 

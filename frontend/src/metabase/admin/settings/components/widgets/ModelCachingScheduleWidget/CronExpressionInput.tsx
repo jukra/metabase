@@ -49,6 +49,7 @@ type InputProps = {
   className?: string;
   onChange: (value: string) => void;
   onBlurChange: (value: string) => void;
+  name?: string;
 };
 
 function Input({

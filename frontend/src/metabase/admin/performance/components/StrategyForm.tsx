@@ -1,6 +1,6 @@
 import { useFormikContext } from "formik";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { t } from "ttag";
 import _ from "underscore";
 
@@ -20,16 +20,26 @@ import {
   Icon,
   Loader,
   Radio,
+  Select,
   Stack,
   Text,
   Title,
   Tooltip,
 } from "metabase/ui";
-import type { Strategy, StrategyType } from "metabase-types/api";
+import type {
+  ScheduleStrategy,
+  Strategy,
+  StrategyType,
+} from "metabase-types/api";
 import { DurationUnit } from "metabase-types/api";
 
 import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
 import { rootId, Strategies, strategyValidationSchema } from "../strategies";
+import CronExpressionInput from "metabase/admin/settings/components/widgets/ModelCachingScheduleWidget/CronExpressionInput";
+import styled from "@emotion/styled";
+import { SettingSelect } from "metabase/admin/settings/components/widgets/SettingSelect";
+import CustomScheduleExplainer from "metabase/admin/settings/components/widgets/ModelCachingScheduleWidget/CustomScheduleExplainer";
+import SchedulePicker from "metabase/containers/SchedulePicker";
 
 export const StrategyForm = ({
   targetId,
@@ -57,6 +67,26 @@ export const StrategyForm = ({
     </FormProvider>
   );
 };
+
+export const StyledSettingSelect = styled(SettingSelect)`
+  width: 125px;
+  margin-top: 12px;
+`;
+
+// copied over from ModelCachingScheduleWidget.jsx
+function isCustomSchedule(setting) {
+  const value = setting.value || setting.default;
+  const defaultSchedules = setting.options.map(o => o.value);
+  return !defaultSchedules.includes(value);
+}
+
+// copied over from ModelCachingScheduleWidget.jsx
+// Perhaps we should do this formatting in a translate function when we download/upload data
+function formatCronExpression(cronExpression) {
+  const [, ...partsWithoutSeconds] = cronExpression.split(" ");
+  const partsWithoutSecondsAndYear = partsWithoutSeconds.slice(0, -1);
+  return partsWithoutSecondsAndYear.join(" ");
+}
 
 const StrategyFormBody = ({
   targetId,
@@ -127,9 +157,88 @@ const StrategyFormBody = ({
             <input type="hidden" name="unit" />
           </>
         )}
+        {selectedStrategyType === "schedule" && <ScheduleStrategyFormFields />}
       </Stack>
       <FormButtons />
     </Form>
+  );
+};
+
+// type ScheduleSetting = { value: string; options: any; default: string };
+
+const namedCronSchedules = [
+  {
+    value: "0 0 0/1 * * ? *",
+    name: t`Hour`,
+  },
+  {
+    value: "0 0 0/2 * * ? *",
+    name: t`2 hours`,
+  },
+  {
+    value: "0 0 0/3 * * ? *",
+    name: t`3 hours`,
+  },
+  {
+    value: "0 0 0/6 * * ? *",
+    name: t`6 hours`,
+  },
+  {
+    value: "0 0 0/12 * * ? *",
+    name: t`12 hours`,
+  },
+  {
+    value: "0 0 0 ? * * *",
+    name: t`24 hours`,
+  },
+  {
+    value: "custom",
+    name: t`Custom…`,
+  },
+];
+
+const ScheduleStrategyFormFields = () => {
+  // It might be challenging to support "the second Monday". Quartz scheduling supports this, and we link to the Quartz scheduling documentation in Admin > Settings > Caching, in the Models, custom schedule widget. In Quartz, "2#2" means the second Tuesday of the month. But if you type that into our cron expression input, weird things happen.
+  // second
+  // minute
+  // hour
+  // dayOfMonth
+  // month
+  // dayOfWeek
+  const onScheduleChange = useCallback(
+    (newSchedule: any, { name, value }) => {},
+    [],
+  );
+
+  return (
+    <>
+      <Field title={t`Schedule`}>
+        <SchedulePicker
+          schedule={schedule}
+          scheduleOptions={["hourly", "daily", "weekly"]}
+          onScheduleChange={onScheduleChange}
+          textBeforeInterval="Invalidate"
+        />
+        <Select
+          name="minute"
+          data={namedCronSchedules.map(option => {
+            return {
+              label: option.name,
+              value: option.value as string,
+            };
+          })}
+        />
+        <Select
+          name="schedule"
+          data={namedCronSchedules.map(option => {
+            return {
+              label: option.name,
+              value: option.value as string,
+            };
+          })}
+        />
+      </Field>
+    </>
   );
 };
 
