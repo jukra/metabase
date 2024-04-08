@@ -5,7 +5,7 @@ import {
   setupPropertiesEndpoints,
   setupSettingsEndpoints,
 } from "__support__/server-mocks";
-import { renderWithProviders } from "__support__/ui";
+import { screen, renderWithProviders } from "__support__/ui";
 import type { Settings, TokenFeatures } from "metabase-types/api";
 import {
   createMockSettings,
@@ -55,3 +55,6 @@ export const getLastHomepageSettingSettingCall = () =>
   fetchMock.lastCall("path:/api/setting/embedding-homepage", {
     method: "PUT",
   });
+
+export const queryFeedbackModal = () =>
+  screen.queryByText("How can we improve embedding?");

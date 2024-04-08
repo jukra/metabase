@@ -1,9 +1,13 @@
 import userEvent from "@testing-library/user-event";
 import fetchMock from "fetch-mock";
 
-import { screen } from "__support__/ui";
+import { screen, waitForElementToBeRemoved } from "__support__/ui";
 
-import { getLastHomepageSettingSettingCall, setup } from "./setup";
+import {
+  queryFeedbackModal,
+  getLastHomepageSettingSettingCall,
+  setup,
+} from "./setup";
 
 describe("EmbedHomepage (OSS)", () => {
   it("should default to the static tab for OSS builds", () => {
@@ -84,6 +88,8 @@ describe("EmbedHomepage (OSS)", () => {
       await userEvent.click(screen.getByText("Cancel"));
 
       expect(getLastHomepageSettingSettingCall()).toBeUndefined();
+
+      await waitForElementToBeRemoved(() => queryFeedbackModal());
     });
 
     it("should dismiss when submitting feedback - even if empty", async () => {
@@ -98,6 +104,8 @@ describe("EmbedHomepage (OSS)", () => {
 
       const body = await lastCall?.request?.json();
       expect(body).toEqual({ value: "dismiss-run-into-issues" });
+
+      await waitForElementToBeRemoved(() => queryFeedbackModal());
     });
 
     it("should send feedback when submitting the modal", async () => {
@@ -125,7 +133,6 @@ describe("EmbedHomepage (OSS)", () => {
           method: "POST",
         },
       );
-      expect(feedbackCall).not.toBeUndefined();
 
       const feedbackBody = await feedbackCall?.request?.json();
 
@@ -134,6 +141,8 @@ describe("EmbedHomepage (OSS)", () => {
         email: "user@example.org",
         source: "embedding-homepage-dismiss",
       });
+
+      await waitForElementToBeRemoved(() => queryFeedbackModal());
     });
   });
 });
