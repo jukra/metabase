@@ -15,6 +15,15 @@ export const ExpressionList = styled.ul`
   overflow-y: auto;
 `;
 
+export const SuggestionMatch = styled.span`
+  font-weight: bold;
+`;
+
+const highlighted = css`
+  color: ${color("white")};
+  background-color: ${color("brand")};
+`;
+
 export const ExpressionListItem = styled.li<{ isHighlighted: boolean }>`
   display: flex;
   align-items: center;
@@ -24,31 +33,10 @@ export const ExpressionListItem = styled.li<{ isHighlighted: boolean }>`
   min-height: 1.625rem;
 
   &:hover {
-    color: ${color("white")};
-    background-color: ${color("brand")};
+    ${highlighted}
   }
 
-  ${({ isHighlighted }) =>
-    isHighlighted &&
-    css`
-      color: ${color("white")};
-      background-color: ${color("brand")};
-    `}
-`;
-
-export const SuggestionSpanRoot = styled.span`
-  color: ${color("text-medium")};
-`;
-
-interface SuggestionSpanContentProps {
-  isHighlighted?: boolean;
-}
-
-export const SuggestionSpanContent = styled.span<SuggestionSpanContentProps>`
-  color: ${props =>
-    props.isHighlighted ? color("white") : color("text-dark")};
-  font-weight: bold;
-  background-color: ${props => props.isHighlighted && color("brand")};
+  ${props => props.isHighlighted && highlighted}
 `;
 
 export const SuggestionTitle = styled.span`

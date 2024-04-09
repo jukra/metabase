@@ -14,8 +14,7 @@ import {
   ExpressionListItem,
   ExpressionList,
   ExpressionPopover,
-  SuggestionSpanContent,
-  SuggestionSpanRoot,
+  SuggestionMatch,
   SuggestionTitle,
   QueryColumnInfoIcon,
 } from "./ExpressionEditorSuggestions.styled";
@@ -86,7 +85,9 @@ function ExpressionEditorSuggestionsListItem({
   isHighlighted: boolean;
   onSuggestionMouseDown: (index: number) => void;
 }) {
-  const { icon } = suggestion;
+  const { icon, name, range = [] } = suggestion;
+  const [start = 0, end = name.length - 1] = range;
+
   const { normal, highlighted } = colorForIcon(icon);
 
   const ref = useRef<HTMLLIElement>(null);
@@ -134,11 +135,9 @@ function ExpressionEditorSuggestionsListItem({
           />
         )}
         <SuggestionTitle data-ignore-outside-clicks>
-          <SuggestionSpan
-            suggestion={suggestion}
-            isHighlighted={isHighlighted}
-            data-ignore-outside-clicks
-          />
+          {suggestion.name.slice(0, start)}
+          <SuggestionMatch>{suggestion.name.slice(start, end)}</SuggestionMatch>
+          {suggestion.name.slice(end)}
         </SuggestionTitle>
         {suggestion.column && (
           <QueryColumnInfoIcon
@@ -150,26 +149,6 @@ function ExpressionEditorSuggestionsListItem({
         )}
       </ExpressionListItem>
     </HoverParent>
-  );
-}
-
-function SuggestionSpan({
-  suggestion,
-  isHighlighted,
-}: {
-  suggestion: Suggestion;
-  isHighlighted: boolean;
-}) {
-  return !isHighlighted && suggestion.range ? (
-    <SuggestionSpanRoot>
-      {suggestion.name.slice(0, suggestion.range[0])}
-      <SuggestionSpanContent isHighlighted={isHighlighted}>
-        {suggestion.name.slice(suggestion.range[0], suggestion.range[1])}
-      </SuggestionSpanContent>
-      {suggestion.name.slice(suggestion.range[1])}
-    </SuggestionSpanRoot>
-  ) : (
-    <>{suggestion.name}</>
   );
 }
 
