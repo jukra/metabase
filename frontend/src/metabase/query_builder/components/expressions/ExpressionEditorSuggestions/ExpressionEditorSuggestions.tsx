@@ -19,8 +19,7 @@ import {
   QueryColumnInfoIcon,
 } from "./ExpressionEditorSuggestions.styled";
 
-// eslint-disable-next-line import/no-default-export
-export default function ExpressionEditorSuggestions({
+export function ExpressionEditorSuggestions({
   query,
   stageIndex,
   suggestions,
