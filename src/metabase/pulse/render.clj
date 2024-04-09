@@ -100,6 +100,15 @@
              (= @col-sample-count @row-sample-count 1))
         (chart-type :scalar "result has one row and one column")
 
+        (#{:smartscalar
+           :scatter
+           :waterfall
+           :line
+           :area
+           :bar
+           :combo} display-type)
+        (chart-type :javascript_visualization "display-type is javascript_visualization")
+
         (#{:scalar
            :smartscalar
            :row
@@ -108,16 +117,6 @@
            :table
            :funnel} display-type)
         (chart-type display-type "display-type is %s" display-type)
-
-        (#{:smartscalar
-           :scalar
-           :scatter
-           :waterfall
-           :line
-           :area
-           :bar
-           :combo} display-type)
-        (chart-type :javascript_visualization "display-type is javascript_visualization")
 
         (= display-type :pie)
         (chart-type :categorical/donut "result has two cols (%s and %s (number))" (col-description @col-1) (col-description @col-2))
