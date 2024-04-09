@@ -1,6 +1,6 @@
-/* eslint-disable react/prop-types */
 import cx from "classnames";
 import PropTypes from "prop-types";
+import type { MouseEventHandler } from "react";
 import { Component, Fragment } from "react";
 import _ from "underscore";
 
@@ -8,7 +8,9 @@ import { HoverParent } from "metabase/components/MetadataInfo/ColumnInfoIcon";
 import CS from "metabase/css/core/index.css";
 import { color } from "metabase/lib/colors";
 import { isObscured } from "metabase/lib/dom";
-import { DelayGroup, Icon } from "metabase/ui";
+import { DelayGroup, Icon, type IconName } from "metabase/ui";
+import type * as Lib from "metabase-lib";
+import type { Suggestion } from "metabase-lib/v1/expressions/suggest";
 
 import {
   ExpressionListItem,
@@ -20,26 +22,7 @@ import {
   QueryColumnInfoIcon,
 } from "./ExpressionEditorSuggestions.styled";
 
-const SuggestionSpan = ({ suggestion, isHighlighted }) => {
-  return !isHighlighted && suggestion.range ? (
-    <SuggestionSpanRoot>
-      {suggestion.name.slice(0, suggestion.range[0])}
-      <SuggestionSpanContent isHighlighted={isHighlighted}>
-        {suggestion.name.slice(suggestion.range[0], suggestion.range[1])}
-      </SuggestionSpanContent>
-      {suggestion.name.slice(suggestion.range[1])}
-    </SuggestionSpanRoot>
-  ) : (
-    suggestion.name
-  );
-};
-
-SuggestionSpan.propTypes = {
-  suggestion: PropTypes.object,
-  isHighlighted: PropTypes.bool,
-};
-
-function colorForIcon(icon) {
+function colorForIcon(icon: string | undefined | null) {
   switch (icon) {
     case "segment":
       return { normal: color("accent2"), highlighted: color("brand-white") };
@@ -54,6 +37,8 @@ function colorForIcon(icon) {
       };
   }
 }
+
+// eslint-disable-next-line import/no-default-export
 export default class ExpressionEditorSuggestions extends Component {
   static propTypes = {
     query: PropTypes.object.isRequired,
@@ -64,7 +49,7 @@ export default class ExpressionEditorSuggestions extends Component {
     target: PropTypes.instanceOf(Element),
   };
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (
       (prevProps && prevProps.highlightedIndex) !== this.props.highlightedIndex
     ) {
@@ -107,7 +92,7 @@ export default class ExpressionEditorSuggestions extends Component {
               data-testid="expression-suggestions-list"
               className={CS.pb1}
             >
-              {suggestions.map((suggestion, i) => (
+              {suggestions.map((suggestion: Suggestion, i: number) => (
                 <Fragment key={`$suggestion-${i}`}>
                   <ExpressionEditorSuggestionsListItem
                     query={query}
@@ -132,6 +117,12 @@ function ExpressionEditorSuggestionsListItem({
   suggestion,
   isHighlighted,
   onMouseDownCapture,
+}: {
+  query: Lib.Query;
+  stageIndex: number;
+  suggestion: Suggestion;
+  isHighlighted: boolean;
+  onMouseDownCapture: MouseEventHandler;
 }) {
   const { icon } = suggestion;
   const { normal, highlighted } = colorForIcon(icon);
@@ -145,12 +136,14 @@ function ExpressionEditorSuggestionsListItem({
         data-ignore-outside-clicks
         data-testid="expression-suggestions-list-item"
       >
-        <Icon
-          name={icon}
-          color={isHighlighted ? highlighted : normal}
-          className={CS.mr1}
-          data-ignore-outside-clicks
-        />
+        {icon && (
+          <Icon
+            name={icon as IconName}
+            color={isHighlighted ? highlighted : normal}
+            className={CS.mr1}
+            data-ignore-outside-clicks
+          />
+        )}
         <SuggestionTitle data-ignore-outside-clicks>
           <SuggestionSpan
             suggestion={suggestion}
@@ -158,13 +151,35 @@ function ExpressionEditorSuggestionsListItem({
             data-ignore-outside-clicks
           />
         </SuggestionTitle>
-        <QueryColumnInfoIcon
-          query={query}
-          stageIndex={stageIndex}
-          column={suggestion.column}
-          position="right"
-        />
+        {suggestion.column && (
+          <QueryColumnInfoIcon
+            query={query}
+            stageIndex={stageIndex}
+            column={suggestion.column}
+            position="right"
+          />
+        )}
       </ExpressionListItem>
     </HoverParent>
+  );
+}
+
+function SuggestionSpan({
+  suggestion,
+  isHighlighted,
+}: {
+  suggestion: Suggestion;
+  isHighlighted: boolean;
+}) {
+  return !isHighlighted && suggestion.range ? (
+    <SuggestionSpanRoot>
+      {suggestion.name.slice(0, suggestion.range[0])}
+      <SuggestionSpanContent isHighlighted={isHighlighted}>
+        {suggestion.name.slice(suggestion.range[0], suggestion.range[1])}
+      </SuggestionSpanContent>
+      {suggestion.name.slice(suggestion.range[1])}
+    </SuggestionSpanRoot>
+  ) : (
+    <>{suggestion.name}</>
   );
 }
