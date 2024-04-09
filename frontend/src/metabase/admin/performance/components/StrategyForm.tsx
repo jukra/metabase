@@ -27,6 +27,8 @@ import {
   Tooltip,
 } from "metabase/ui";
 import type {
+  ScheduleFrameType,
+  ScheduleSettings,
   ScheduleStrategy,
   Strategy,
   StrategyType,
@@ -40,6 +42,7 @@ import styled from "@emotion/styled";
 import { SettingSelect } from "metabase/admin/settings/components/widgets/SettingSelect";
 import CustomScheduleExplainer from "metabase/admin/settings/components/widgets/ModelCachingScheduleWidget/CustomScheduleExplainer";
 import SchedulePicker from "metabase/containers/SchedulePicker";
+import { DAY_OF_WEEK_OPTIONS } from "metabase/lib/date-time";
 
 export const StrategyForm = ({
   targetId,
@@ -205,39 +208,22 @@ const ScheduleStrategyFormFields = () => {
   // dayOfMonth
   // month
   // dayOfWeek
-  const onScheduleChange = useCallback(
-    (newSchedule: any, { name, value }) => {},
-    [],
-  );
-
+  const { values, setFieldValue } = useFormikContext<ScheduleStrategy>();
+  const [schedule, setSchedule] = useState<ScheduleSettings>({});
   return (
     <>
-      <Field title={t`Schedule`}>
-        <SchedulePicker
-          schedule={schedule}
-          scheduleOptions={["hourly", "daily", "weekly"]}
-          onScheduleChange={onScheduleChange}
-          textBeforeInterval="Invalidate"
-        />
-        <Select
-          name="minute"
-          data={namedCronSchedules.map(option => {
-            return {
-              label: option.name,
-              value: option.value as string,
-            };
-          })}
-        />
-        <Select
-          name="schedule"
-          data={namedCronSchedules.map(option => {
-            return {
-              label: option.name,
-              value: option.value as string,
-            };
-          })}
-        />
-      </Field>
+      <SchedulePicker
+        schedule={schedule}
+        scheduleOptions={["hourly", "daily", "weekly", "monthly"]}
+        onScheduleChange={val => {
+          console.log("val", val);
+          setSchedule(val);
+          // TODO: Convert value to cron
+          //setFieldValue('cron', val);
+        }}
+        // TODO: Use margin (not special unicode characters) to add spacing to this text
+        textBeforeInterval="Invalidate   "
+      />
     </>
   );
 };

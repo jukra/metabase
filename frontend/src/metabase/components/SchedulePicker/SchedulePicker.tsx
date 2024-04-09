@@ -66,6 +66,8 @@ class SchedulePicker extends Component<SchedulePickerProps> {
       [name]: value,
     };
 
+    console.log('newSchedule', newSchedule);
+
     if (name === "schedule_type") {
       // clear out other values than schedule_type for hourly schedule
       if (value === "hourly") {
@@ -247,6 +249,7 @@ class SchedulePicker extends Component<SchedulePickerProps> {
     const { schedule, scheduleOptions, textBeforeInterval } = this.props;
 
     const scheduleType = schedule.schedule_type;
+    console.log('scheduleType', scheduleType);
 
     return (
       <PickerRoot>

@@ -17,6 +17,7 @@ type DayOfWeekOption = {
   id: DayOfWeekId;
 };
 
+// These short names won't localize very well. Can we use dayjs with a locale?
 export const DAY_OF_WEEK_OPTIONS: DayOfWeekOption[] = [
   { name: t`Sunday`, shortName: t`Su`, value: "sun", id: "sunday" },
   { name: t`Monday`, shortName: t`Mo`, value: "mon", id: "monday" },
