@@ -7,8 +7,14 @@ const dayToCron = (day: ScheduleSettings["schedule_day"]) =>
 const frameToCron = (frame: ScheduleFrameType) =>
   ({ first: "1", last: "L", mid: "15" }[frame]);
 
-const getDayOfMonthForCron = (settings: ScheduleSettings) => {
-  let dayOfMonth = settings.schedule_day ? "*" : "?";
+export const scheduleSettingsToCron = (settings: ScheduleSettings): string => {
+  const minute = settings.schedule_minute?.toString() ?? "*";
+  const hour = settings.schedule_hour?.toString() ?? "*";
+  let dayOfWeek = settings.schedule_day
+    ? dayToCron(settings.schedule_day).toString()
+    : "?";
+  const month = "*";
+  let dayOfMonth = settings.schedule_day ? "?" : "*";
   if (settings.schedule_type === "monthly" && settings.schedule_frame) {
     if (settings.schedule_day) {
       let cronifiedFrameWithHash = frameToCron(settings.schedule_frame);
@@ -16,21 +22,10 @@ const getDayOfMonthForCron = (settings: ScheduleSettings) => {
         cronifiedFrameWithHash = "#1";
       }
       const cronifiedDay = dayToCron(settings.schedule_day);
-      dayOfMonth = `${cronifiedDay}${cronifiedFrameWithHash}`;
+      dayOfWeek = `${cronifiedDay}${cronifiedFrameWithHash}`;
     } else {
       dayOfMonth = frameToCron(settings.schedule_frame);
     }
   }
-  return dayOfMonth;
-};
-
-export const scheduleSettingsToCron = (settings: ScheduleSettings): string => {
-  const minute = settings.schedule_minute?.toString() ?? "*";
-  const hour = settings.schedule_hour?.toString() ?? "*";
-  const dayOfWeek = settings.schedule_day
-    ? dayToCron(settings.schedule_day).toString()
-    : "?";
-  const dayOfMonth = getDayOfMonthForCron(settings);
-  const month = "*";
   return `${minute} ${hour} ${dayOfMonth} ${month} ${dayOfWeek}`;
 };

@@ -31,7 +31,7 @@ describe("scheduleSettingsToCron", () => {
       schedule_hour: 12,
     };
     const cron = scheduleSettingsToCron(settings);
-    expect(cron).toEqual("0 12 * * 1");
+    expect(cron).toEqual("0 12 ? * 1");
   });
 
   it("converts 'first Wednesday of the month at 9:15am' to cron", () => {
@@ -43,7 +43,7 @@ describe("scheduleSettingsToCron", () => {
       schedule_hour: 9,
     };
     const cron = scheduleSettingsToCron(settings);
-    expect(cron).toEqual("15 9 * * 3#1");
+    expect(cron).toEqual("15 9 ? * 3#1");
   });
 
   it("converts 'last calendar day of the month' to cron", () => {
@@ -65,7 +65,7 @@ describe("scheduleSettingsToCron", () => {
       schedule_hour: 23,
     };
     const cron = scheduleSettingsToCron(settings);
-    expect(cron).toEqual("05 23 15 * ?");
+    expect(cron).toEqual("5 23 15 * ?");
   });
 
   it("missing minute and hour should default to wildcard", () => {
