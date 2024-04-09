@@ -41,7 +41,7 @@ export interface InheritStrategy extends StrategyBase {
   type: "inherit";
 }
 
-export interface ScheduleStrategy extends StrategyBase, Partial<CronFields> {
+export interface ScheduleStrategy extends StrategyBase {
   type: "schedule";
   cronExpression: string;
 }

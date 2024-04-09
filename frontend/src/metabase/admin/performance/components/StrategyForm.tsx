@@ -1,9 +1,16 @@
 import { useFormikContext } from "formik";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { t } from "ttag";
 import _ from "underscore";
 
+import type {
+  ScheduleSettings,
+  ScheduleStrategy,
+  Strategy,
+  StrategyType,
+} from "metabase-types/api";
+import { DurationUnit } from "metabase-types/api";
 import type { FormTextInputProps } from "metabase/forms";
 import {
   Form,
@@ -20,29 +27,18 @@ import {
   Icon,
   Loader,
   Radio,
-  Select,
   Stack,
   Text,
   Title,
   Tooltip,
 } from "metabase/ui";
-import type {
-  ScheduleFrameType,
-  ScheduleSettings,
-  ScheduleStrategy,
-  Strategy,
-  StrategyType,
-} from "metabase-types/api";
-import { DurationUnit } from "metabase-types/api";
 
-import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
-import { rootId, Strategies, strategyValidationSchema } from "../strategies";
-import CronExpressionInput from "metabase/admin/settings/components/widgets/ModelCachingScheduleWidget/CronExpressionInput";
 import styled from "@emotion/styled";
 import { SettingSelect } from "metabase/admin/settings/components/widgets/SettingSelect";
-import CustomScheduleExplainer from "metabase/admin/settings/components/widgets/ModelCachingScheduleWidget/CustomScheduleExplainer";
 import SchedulePicker from "metabase/containers/SchedulePicker";
-import { DAY_OF_WEEK_OPTIONS } from "metabase/lib/date-time";
+import { useRecentlyTrue } from "../hooks/useRecentlyTrue";
+import { rootId, Strategies, strategyValidationSchema } from "../strategies";
+import { cronToScheduleSettings, scheduleSettingsToCron } from "../utils";
 
 export const StrategyForm = ({
   targetId,
@@ -201,30 +197,26 @@ const namedCronSchedules = [
 ];
 
 const ScheduleStrategyFormFields = () => {
-  // It might be challenging to support "the second Monday". Quartz scheduling supports this, and we link to the Quartz scheduling documentation in Admin > Settings > Caching, in the Models, custom schedule widget. In Quartz, "2#2" means the second Tuesday of the month. But if you type that into our cron expression input, weird things happen.
-  // second
-  // minute
-  // hour
-  // dayOfMonth
-  // month
-  // dayOfWeek
   const { values, setFieldValue } = useFormikContext<ScheduleStrategy>();
-  const [schedule, setSchedule] = useState<ScheduleSettings>({});
+  const initialSchedule = cronToScheduleSettings(values.cronExpression);
+  if (!initialSchedule) {
+    // Show custom cron input
+    return <>(Show custom cron input here since we can't convert the expression)</>
+  }
+  const [schedule, setSchedule] = useState<ScheduleSettings>(initialSchedule);
   return (
-    <>
-      <SchedulePicker
-        schedule={schedule}
-        scheduleOptions={["hourly", "daily", "weekly", "monthly"]}
-        onScheduleChange={val => {
-          console.log("val", val);
-          setSchedule(val);
-          // TODO: Convert value to cron
-          //setFieldValue('cron', val);
-        }}
-        // TODO: Use margin (not special unicode characters) to add spacing to this text
-        textBeforeInterval="Invalidate   "
-      />
-    </>
+    <SchedulePicker
+      schedule={schedule}
+      scheduleOptions={["hourly", "daily", "weekly", "monthly"]}
+      onScheduleChange={(nextSchedule: ScheduleSettings) => {
+        setSchedule(nextSchedule);
+        const cron = scheduleSettingsToCron(nextSchedule);
+        // TODO: Convert value to cron
+        //setFieldValue('cron', val);
+      }}
+      // TODO: Use margin (not special unicode characters) to add spacing to this text
+      textBeforeInterval="Invalidate   "
+    />
   );
 };
 
