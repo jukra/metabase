@@ -201,7 +201,9 @@ const ScheduleStrategyFormFields = () => {
   const initialSchedule = cronToScheduleSettings(values.cronExpression);
   if (!initialSchedule) {
     // Show custom cron input
-    return <>(Show custom cron input here since we can't convert the expression)</>
+    return (
+      <>(Show custom cron input here since we can't convert the expression)</>
+    );
   }
   const [schedule, setSchedule] = useState<ScheduleSettings>(initialSchedule);
   return (
@@ -214,8 +216,17 @@ const ScheduleStrategyFormFields = () => {
         // TODO: Convert value to cron
         //setFieldValue('cron', val);
       }}
-      // TODO: Use margin (not special unicode characters) to add spacing to this text
-      textBeforeInterval="Invalidate   "
+      textBeforeInterval="Invalidate"
+      Text={({ children }) => (
+        <Text
+          fw="bold"
+          miw="6rem"
+          align="end"
+          style={{ paddingInlineEnd: "1ex" }}
+        >
+          {children}
+        </Text>
+      )}
     />
   );
 };

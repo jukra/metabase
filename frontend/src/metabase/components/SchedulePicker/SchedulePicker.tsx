@@ -1,5 +1,5 @@
 import cx from "classnames";
-import { Component } from "react";
+import { Component, ReactNode } from "react";
 import { t } from "ttag";
 
 import { SegmentedControl } from "metabase/components/SegmentedControl";
@@ -52,6 +52,7 @@ export interface SchedulePickerProps {
     nextSchedule: ScheduleSettings,
     change: ScheduleChangeProp,
   ) => void;
+  Text?: React.FC<{ children: ReactNode }>;
 }
 
 const DEFAULT_DAY = "mon";
@@ -65,8 +66,6 @@ class SchedulePicker extends Component<SchedulePickerProps> {
       ...this.props.schedule,
       [name]: value,
     };
-
-    console.log('newSchedule', newSchedule);
 
     if (name === "schedule_type") {
       // clear out other values than schedule_type for hourly schedule
@@ -131,7 +130,7 @@ class SchedulePicker extends Component<SchedulePickerProps> {
   }
 
   renderMonthlyPicker() {
-    const { schedule } = this.props;
+    const { schedule, Text = PickerText } = this.props;
 
     const DAY_OPTIONS = [
       { name: t`Calendar Day`, value: null },
@@ -140,7 +139,7 @@ class SchedulePicker extends Component<SchedulePickerProps> {
 
     return (
       <PickerSpacedRow>
-        <PickerText>{t`on the`}</PickerText>
+        <Text>{t`on the`}</Text>
         <Select
           value={schedule.schedule_frame}
           onChange={(e: SelectChangeEvent<ScheduleFrameType>) =>
@@ -181,13 +180,13 @@ class SchedulePicker extends Component<SchedulePickerProps> {
   }
 
   renderMinutePicker() {
-    const { schedule } = this.props;
+    const { schedule, Text = PickerText } = this.props;
     const minuteOfHour = isNaN(schedule.schedule_minute as number)
       ? 0
       : schedule.schedule_minute;
     return (
       <PickerSpacedRow>
-        <PickerText>{t`at`}</PickerText>
+        <Text>{t`at`}</Text>
         <Select
           className="mr1"
           value={minuteOfHour}
@@ -202,7 +201,7 @@ class SchedulePicker extends Component<SchedulePickerProps> {
   }
 
   renderHourPicker() {
-    const { schedule, timezone, textBeforeSendTime } = this.props;
+    const { schedule, timezone, textBeforeSendTime, Text = PickerText } = this.props;
 
     const hourOfDay = isNaN(schedule.schedule_hour as number)
       ? 8
@@ -214,7 +213,7 @@ class SchedulePicker extends Component<SchedulePickerProps> {
     return (
       <>
         <PickerSpacedRow>
-          <PickerText>{t`at`}</PickerText>
+          <Text>{t`at`}</Text>
           <Select
             className="mr1"
             value={hour}
@@ -246,15 +245,14 @@ class SchedulePicker extends Component<SchedulePickerProps> {
   }
 
   render() {
-    const { schedule, scheduleOptions, textBeforeInterval } = this.props;
+    const { schedule, scheduleOptions, textBeforeInterval, Text = PickerText } = this.props;
 
     const scheduleType = schedule.schedule_type;
-    console.log('scheduleType', scheduleType);
 
     return (
       <PickerRoot>
         <PickerRow>
-          <PickerText>{textBeforeInterval}</PickerText>
+          <Text>{textBeforeInterval}</Text>
           <Select
             value={scheduleType}
             onChange={(e: SelectChangeEvent<ScheduleType>) =>
