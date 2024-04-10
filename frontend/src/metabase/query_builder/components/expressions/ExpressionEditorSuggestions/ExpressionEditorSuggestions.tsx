@@ -29,7 +29,7 @@ export function ExpressionEditorSuggestions({
 }: {
   query: Lib.Query;
   stageIndex: number;
-  suggestions: Suggestion[];
+  suggestions?: Suggestion[];
   onSuggestionMouseDown: (index: number) => void;
   highlightedIndex: number;
   children: ReactNode;
@@ -37,7 +37,7 @@ export function ExpressionEditorSuggestions({
   return (
     <Popover
       position="bottom-start"
-      opened={suggestions.length > 0}
+      opened={suggestions?.length > 0}
       radius="xs"
       withinPortal
       zIndex={300}
