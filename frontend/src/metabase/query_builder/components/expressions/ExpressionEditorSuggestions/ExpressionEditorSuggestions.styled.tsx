@@ -2,16 +2,11 @@ import { css } from "@emotion/react";
 import styled from "@emotion/styled";
 
 import { QueryColumnInfoIcon as BaseQueryColumnInfoIcon } from "metabase/components/MetadataInfo/ColumnInfoIcon";
-import TippyPopover from "metabase/components/Popover/TippyPopover";
-import { alpha, color } from "metabase/lib/colors";
-
-export const ExpressionPopover = styled(TippyPopover)`
-  border-color: ${alpha("accent2", 0.2)};
-  border-radius: 0;
-`;
+import { color } from "metabase/lib/colors";
 
 export const ExpressionList = styled.ul`
   min-width: 150px;
+  max-height: 350px;
   overflow-y: auto;
 `;
 

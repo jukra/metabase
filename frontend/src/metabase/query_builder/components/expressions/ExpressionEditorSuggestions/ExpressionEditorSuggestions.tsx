@@ -1,19 +1,19 @@
 import cx from "classnames";
-import { useEffect, useRef, useCallback, type RefObject } from "react";
+import type { ReactNode } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import _ from "underscore";
 
 import { HoverParent } from "metabase/components/MetadataInfo/ColumnInfoIcon";
 import CS from "metabase/css/core/index.css";
 import { color } from "metabase/lib/colors";
 import { isObscured } from "metabase/lib/dom";
-import { DelayGroup, Icon, type IconName } from "metabase/ui";
+import { DelayGroup, Icon, type IconName, Popover } from "metabase/ui";
 import type * as Lib from "metabase-lib";
 import type { Suggestion } from "metabase-lib/v1/expressions/suggest";
 
 import {
   ExpressionListItem,
   ExpressionList,
-  ExpressionPopover,
   SuggestionMatch,
   SuggestionTitle,
   QueryColumnInfoIcon,
@@ -25,28 +25,27 @@ export function ExpressionEditorSuggestions({
   suggestions,
   onSuggestionMouseDown,
   highlightedIndex,
-  target,
+  children,
 }: {
   query: Lib.Query;
   stageIndex: number;
   suggestions: Suggestion[];
   onSuggestionMouseDown: (index: number) => void;
   highlightedIndex: number;
-  target: RefObject<HTMLElement>;
+  children: ReactNode;
 }) {
-  if (!suggestions.length || !target) {
-    return null;
-  }
-
   return (
-    <DelayGroup>
-      <ExpressionPopover
-        placement="bottom-start"
-        sizeToFit
-        visible
-        reference={target}
-        zIndex={300}
-        content={
+    <Popover
+      position="bottom-start"
+      opened={suggestions.length > 0}
+      radius="xs"
+      withinPortal
+      zIndex={300}
+      returnFocus
+    >
+      <Popover.Target>{children}</Popover.Target>
+      <Popover.Dropdown>
+        <DelayGroup>
           <ExpressionList
             data-testid="expression-suggestions-list"
             className={CS.pb1}
@@ -63,9 +62,9 @@ export function ExpressionEditorSuggestions({
               />
             ))}
           </ExpressionList>
-        }
-      />
-    </DelayGroup>
+        </DelayGroup>
+      </Popover.Dropdown>
+    </Popover>
   );
 }
 
