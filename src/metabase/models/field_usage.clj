@@ -4,7 +4,6 @@
    [metabase.lib.schema :as lib.schema]
    [metabase.lib.util :as lib.util]
    [metabase.models.interface :as mi]
-   [metabase.query-processor.middleware.fetch-source-query :as fetch-source-query]
    [metabase.util.malli :as mu]
    [methodical.core :as methodical]
    [toucan2.core :as t2]
@@ -56,8 +55,8 @@
         :breakout_binning_num_bins  (:num-bins binning-option)}))))
 
 (defn- expression->field-usage
-  [expresison-clause]
-  (when-let [field-ids (seq (lib.util/referenced-field-ids expresison-clause))]
+  [expression-clause]
+  (when-let [field-ids (seq (lib.util/referenced-field-ids expression-clause))]
     (for [field-id field-ids]
       {:field_id field-id
        :used_in  :expression})))
@@ -66,9 +65,8 @@
 
 (defn- join->field-usages
   [query join]
-  (let [join-query (fetch-source-query/resolve-source-cards (assoc query :stages (get join :stages)))]
-    ;; treat the source query as a :mbql/query
-    (pmbql->field-usages join-query)))
+  ;; treat the source query as a :mbql/query
+  (pmbql->field-usages (assoc query :stages (get join :stages))))
 
 (defn- stage->field-usages
   [query stage-number]
@@ -82,6 +80,6 @@
 (mu/defn pmbql->field-usages
   "Given a pmbql query, returns field usages from filter, breakout, aggregation, expression of a query.
   Walk all stages and joins.
-  Expects all the source cards were resolved"
+  Expects a fully processed query where all source cards and joins are resolved."
   [pmbql :- ::lib.schema/query]
   (mapcat #(stage->field-usages pmbql %) (range (lib/stage-count pmbql))))
